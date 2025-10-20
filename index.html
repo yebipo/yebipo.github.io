@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер по Математике</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #282c34;
+            --surface-color: #3b4049;
+            --primary-color: #61dafb;
+            --secondary-color: #98c379;
+            --accent-color: #e06c75;
+            --operator-color: #c678dd;
+            --operator-hover: #be50e7;
+            --text-color: #abb2bf;
+            --text-light: #ffffff;
+            --success-color: #98c379;
+            --error-color: #e06c75;
+            --gold-color: #ffd700;
+            --silver-color: #c0c0c0;
+            --bronze-color: #b87333;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.25rem;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #app-container, #welcome-view {
+            width: 720px;
+            height: 1600px;
+            max-height: 95vh;
+            background-color: var(--surface-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.3125rem 1.25rem rgba(0,0,0,0.4);
+            position: relative;
+            overflow-y: auto; /* Scrolling is enabled */
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+            -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        #app-container::-webkit-scrollbar,
+        #welcome-view::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hidden { display: none !important; }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--text-light);
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        button, .button-style {
+            display: inline-block;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            color: var(--text-light);
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 0.625rem;
+            text-align: center;
+        }
+        button:hover, .button-style:hover { transform: translateY(-0.125rem); }
+        button:disabled {
+            background-color: #5c626d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        input[type="text"], input[type="tel"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.625rem;
+            border-radius: 0.5rem;
+            border: 0.125rem solid #555;
+            background-color: #4a4f58;
+            color: var(--text-light);
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        input[type="text"]::placeholder, input[type="tel"]::placeholder { color: var(--text-color); }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        #header-profile-widget {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1.5rem;
+            transition: background-color 0.3s;
+        }
+        #header-profile-widget:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        #header-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+        #header-username {
+            font-weight: bold;
+            color: var(--text-light);
+        }
+        #header-gold-display {
+            font-weight: bold;
+            color: var(--gold-color);
+            background-color: rgba(0,0,0,0.2);
+            padding: 0.25rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.9em;
+        }
+
+        .mode-switch-btn { background-color: var(--secondary-color); }
+        .mode-switch-btn:hover { background-color: #82a865; }
+
+        #home-view {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        .home-menu-btn {
+            font-size: 1.5em;
+            padding: 1.5rem;
+        }
+        #go-to-achievements-btn {
+            background-color: var(--gold-color);
+            color: var(--bg-color);
+        }
+        #go-to-achievements-btn:hover {
+            background-color: #e6c300;
+        }
+
+        .study-view-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        #problem-display {
+            font-size: clamp(2.5em, 10vw, 4.5em);
+            font-weight: bold;
+            color: var(--primary-color);
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #answer-input {
+            font-size: clamp(2em, 9vw, 4em);
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            max-width: 300px;
+            padding: 0.5rem;
+            height: auto;
+        }
+        .study-controls {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 1rem;
+        }
+        .study-controls button {
+            margin-top: 0;
+            padding: 1rem;
+            font-size: 1.2em;
+        }
+        #check-answer-btn { background-color: #56b6c2; }
+        #check-answer-btn:hover { background-color: #45939e; }
+        .back-to-home-btn { background-color: var(--accent-color); }
+        .back-to-home-btn:hover { background-color: #c8414b; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center;
+            z-index: 1000; cursor: pointer; opacity: 1; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.hidden { opacity: 0; pointer-events: none; }
+        .modal-content {
+            background: var(--surface-color); padding: 1.5rem 2rem; border-radius: 0.75rem;
+            box-shadow: 0 0.3125rem 1.5rem rgba(0,0,0,0.5); text-align: center;
+            width: 90%; max-width: 400px; cursor: default; position: relative;
+        }
+        .modal-message { font-size: 1.1em; color: var(--text-light); }
+        .modal-message.success { color: var(--success-color); }
+        .modal-message.error { color: var(--error-color); }
+        .modal-message.achievement { color: var(--gold-color); font-weight: bold; }
+        .achievement-title { font-size: 1.5em; margin-bottom: 0.3125rem; }
+        .achievement-icon { font-size: 2.5em; margin-bottom: 0.625rem; }
+        .achievement-description { font-size: 1em; margin-top: 0.5rem; color: var(--text-color); }
+        .achievement-reward { font-size: 1.2em; margin-top: 0.75rem; color: var(--gold-color); font-weight: bold;}
+        
+        .modal-close-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: transparent;
+            border: none;
+            font-size: 2.5em; /* Increased size */
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            width: 2.5rem; /* Increased clickable area */
+            height: 2.5rem; /* Increased clickable area */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close-btn:hover { 
+            color: var(--text-light);
+            transform: none; /* Override default button hover */
+        }
+
+        .achievement-item {
+            background-color: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.625rem;
+            display: flex; align-items: center; gap: 1rem; transition: background-color 0.3s;
+        }
+        .achievement-item.unlocked { background-color: rgba(255, 215, 0, 0.15); }
+        .achievement-icon-list { font-size: 2.5em; color: #666; }
+        .achievement-item.unlocked .achievement-icon-list { color: var(--gold-color); }
+        .achievement-details { text-align: left; }
+        .achievement-name { font-size: 1.1em; font-weight: bold; color: #999; }
+        .achievement-item.unlocked .achievement-name { color: var(--text-light); }
+        .achievement-desc { font-size: 0.9em; color: #777; }
+        .achievement-item.unlocked .achievement-desc { color: var(--text-color); }
+
+        #profile-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #profile-picture {
+            width: 12.5rem; height: 12.5rem; border-radius: 50%;
+            border: 0.25rem solid var(--primary-color);
+            object-fit: cover; background-color: #4a4f58;
+            margin-bottom: 1.25rem;
+        }
+        #photo-upload-label { background-color: var(--operator-color); }
+        #photo-upload-label:hover { background-color: var(--operator-hover); }
+        #save-profile-btn { background-color: var(--success-color); }
+        #save-profile-btn:hover { background-color: #82a865; }
+        input[type="file"] { display: none; }
+        #profile-name-input {
+            text-align: center;
+            font-size: 1.2em;
+        }
+        #profile-status-input {
+            text-align: center;
+            font-size: 1.1em;
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        #profile-status-input::placeholder {
+            color: rgba(152, 195, 121, 0.7);
+        }
+        #profile-gold-container {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            border: 1px solid var(--gold-color);
+        }
+        #profile-gold-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--gold-color);
+            text-shadow: 0 0 8px var(--gold-color);
+        }
+        #profile-gold-label {
+            font-size: 1em;
+            color: var(--text-color);
+            margin-top: 0.25rem;
+            display: block;
+        }
+        #medal-container {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        #medal-icon {
+            font-size: 6rem;
+            transition: color 0.5s, opacity 0.5s, text-shadow 0.5s;
+        }
+        .medal-transparent {
+            opacity: 0.3;
+            color: var(--text-color);
+            text-shadow: none;
+        }
+        .medal-bronze {
+            color: var(--bronze-color);
+            text-shadow: 0 0 8px var(--bronze-color);
+            opacity: 1;
+        }
+        .medal-silver {
+            color: var(--silver-color);
+            text-shadow: 0 0 8px var(--silver-color);
+            opacity: 1;
+        }
+        .medal-gold {
+            color: var(--gold-color);
+            text-shadow: 0 0 8px var(--gold-color);
+            opacity: 1;
+        }
+        #medal-description {
+            margin-top: 0.5rem;
+            font-size: 0.9em;
+            color: var(--text-color);
+            min-height: 1.2em;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="welcome-view">
+        <h1>Добро пожаловать в Тренажер!</h1>
+        <p>Как к тебе обращаться?</p>
+        <input type="text" id="name-input" placeholder="Введите ваше имя...">
+        <button id="start-btn" class="mode-switch-btn">Начать!</button>
+    </div>
+
+    <div id="app-container" class="hidden">
+        <div class="app-header">
+            <h1 id="view-title">Главное Меню</h1>
+            <div id="header-profile-widget" title="Перейти в профиль">
+                <span id="header-username"></span>
+                <span id="header-gold-display"></span>
+                <img id="header-avatar" src="https://placehold.co/40x40/4a4f58/abb2bf?text=?" alt="Аватар">
+            </div>
+        </div>
+
+        <div id="home-view">
+            <h2 id="home-greeting">Выберите режим</h2>
+            <button id="go-to-multiplication-btn" class="home-menu-btn mode-switch-btn">Таблица умножения</button>
+            <button id="go-to-single-digit-btn" class="home-menu-btn mode-switch-btn">Сложение однозначных</button>
+            <button id="go-to-double-digit-btn" class="home-menu-btn mode-switch-btn">Сложение двузначных</button>
+            <button id="go-to-squares-btn" class="home-menu-btn mode-switch-btn">Квадраты</button>
+            <button id="go-to-roots-btn" class="home-menu-btn mode-switch-btn">Квадратные корни</button>
+            <button id="go-to-achievements-btn" class="home-menu-btn">Достижения</button>
+        </div>
+
+        <div id="study-view" class="hidden">
+            <div class="study-view-content">
+                <div id="problem-display"></div>
+                <input type="tel" id="answer-input" inputmode="numeric" pattern="[0-9]*" placeholder="Ответ">
+                <div class="study-controls">
+                    <button id="check-answer-btn">Проверить</button>
+                </div>
+                 <button id="back-to-home-from-study-btn" class="back-to-home-btn">Назад в меню</button>
+            </div>
+        </div>
+        
+        <div id="achievements-view" class="hidden">
+            <div id="achievements-list"></div>
+            <button id="back-to-home-from-achievements-btn" class="back-to-home-btn">Назад в меню</button>
+        </div>
+
+        <div id="profile-view" class="hidden">
+            <img id="profile-picture" src="https://placehold.co/200x200/4a4f58/abb2bf?text=Фото" alt="Фото профиля">
+            <input type="file" id="photo-upload" accept="image/*">
+            <label for="photo-upload" id="photo-upload-label" class="button-style">Загрузить фото</label>
+            <input type="text" id="profile-name-input" placeholder="Введите ваше имя...">
+            <input type="text" id="profile-status-input" placeholder="Введите ваш статус...">
+            <div id="profile-gold-container">
+                <span id="profile-gold-display"></span>
+                <span id="profile-gold-label">Всего голды</span>
+            </div>
+            <div id="medal-container">
+                <span id="medal-icon"></span>
+                <p id="medal-description"></p>
+            </div>
+            <button id="save-profile-btn">Сохранить</button>
+            <button id="back-to-home-from-profile-btn" class="back-to-home-btn">Назад в меню</button>
+        </div>
+
+        <div id="notification-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <button id="modal-close-btn" class="modal-close-btn">×</button>
+                <p id="modal-message" class="modal-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const MathTrainerApp = {
+            init() {
+                this.setupProperties();
+                this.defineAchievements();
+                this.loadData();
+                this.bindEvents();
+                this.updateGoldDisplay();
+
+                if (this.userName) {
+                    this.welcomeView.classList.add('hidden');
+                    this.appContainer.classList.remove('hidden');
+                    this.updateHeader();
+                    this.switchToView('home');
+                } else {
+                    this.welcomeView.classList.remove('hidden');
+                    this.appContainer.classList.add('hidden');
+                }
+            },
+
+            setupProperties() {
+                // Views
+                this.homeView = document.getElementById('home-view');
+                this.studyView = document.getElementById('study-view');
+                this.achievementsView = document.getElementById('achievements-view');
+                this.profileView = document.getElementById('profile-view');
+                this.welcomeView = document.getElementById('welcome-view');
+                this.appContainer = document.getElementById('app-container');
+
+                // Common
+                this.viewTitle = document.getElementById('view-title');
+                this.homeGreeting = document.getElementById('home-greeting');
+                this.modal = document.getElementById('notification-modal');
+                this.modalMessage = document.getElementById('modal-message');
+
+                // Header
+                this.headerProfileWidget = document.getElementById('header-profile-widget');
+                this.headerAvatar = document.getElementById('header-avatar');
+                this.headerUsername = document.getElementById('header-username');
+                this.headerGoldDisplay = document.getElementById('header-gold-display');
+                
+                // Profile
+                this.profilePicture = document.getElementById('profile-picture');
+                this.profileNameInput = document.getElementById('profile-name-input');
+                this.profileStatusInput = document.getElementById('profile-status-input');
+                this.profileGoldDisplay = document.getElementById('profile-gold-display');
+                this.medalIcon = document.getElementById('medal-icon');
+                this.medalDescription = document.getElementById('medal-description');
+
+                // Study Mode
+                this.problemDisplay = document.getElementById('problem-display');
+                this.answerInput = document.getElementById('answer-input');
+
+                // Achievements
+                this.achievementsListContainer = document.getElementById('achievements-list');
+
+                // State
+                this.userName = '';
+                this.userPhoto = '';
+                this.userStatus = '';
+                this.userGold = 0;
+                this.stats = {};
+                this.dailyStats = {};
+                this.currentMode = null;
+                this.currentAnswer = null;
+                this.messageTimeout = null;
+                
+                // Feedback phrases
+                this.positiveFeedback = ['Туда!', 'Гооол!', 'Чиназес!', 'Крутыш!', 'Уря!', 'Молодец!', 'Умняшка!'];
+                this.negativeFeedback = ['Подумой!', 'Го попробуем ещё раз...', 'Только не плачь!', 'Чуть внимательнее...', 'А если по-другому?', 'Почти!'];
+            },
+            
+            defineAchievements() {
+                const REWARD = 10; // Награда за каждое достижение
+                this.achievements = {
+                    general: [
+                        { id: 'g_first', name: 'Первый шаг', description: 'Решить свой первый пример.', icon: '🌱', condition: stats => (stats.total.multiplication + stats.total.singleDigit + stats.total.doubleDigit + stats.total.squares + stats.total.roots) >= 1, reward: REWARD },
+                        { id: 'g_all_modes', name: 'Разносторонний', description: 'Решить хотя бы один пример в каждом режиме.', icon: '🧠', condition: stats => stats.total.multiplication > 0 && stats.total.singleDigit > 0 && stats.total.doubleDigit > 0 && stats.total.squares > 0 && stats.total.roots > 0, reward: REWARD },
+                        { id: 'g_total_25', name: 'Начинающий', description: 'Решить 25 примеров в сумме.', icon: '🧑‍🎓', condition: stats => (stats.total.multiplication + stats.total.singleDigit + stats.total.doubleDigit + stats.total.squares + stats.total.roots) >= 25, reward: REWARD },
+                        { id: 'g_total_50', name: 'Ученик', description: 'Решить 50 примеров в сумме.', icon: '👨‍🎓', condition: stats => (stats.total.multiplication + stats.total.singleDigit + stats.total.doubleDigit + stats.total.squares + stats.total.roots) >= 50, reward: REWARD },
+                        { id: 'g_total_100', name: 'Знаток', description: 'Решить 100 примеров в сумме.', icon: '🧐', condition: stats => (stats.total.multiplication + stats.total.singleDigit + stats.total.doubleDigit + stats.total.squares + stats.total.roots) >= 100, reward: REWARD },
+                        { id: 'g_total_250', name: 'Эксперт', description: 'Решить 250 примеров в сумме.', icon: '👩‍🏫', condition: stats => (stats.total.multiplication + stats.total.singleDigit + stats.total.doubleDigit + stats.total.squares + stats.total.roots) >= 250, reward: REWARD },
+                        { id: 'g_total_500', name: 'Ветеран', description: 'Решить 500 примеров в сумме.', icon: '🏛️', condition: stats => (stats.total.multiplication + stats.total.singleDigit + stats.total.doubleDigit + stats.total.squares + stats.total.roots) >= 500, reward: REWARD },
+                        { id: 'g_gold_100', name: 'Копилка', description: 'Заработать 100 голды.', icon: '💰', condition: (stats, gold) => gold >= 100, reward: REWARD },
+                        { id: 'g_gold_500', name: 'Сокровищница', description: 'Заработать 500 голды.', icon: '💎', condition: (stats, gold) => gold >= 500, reward: REWARD },
+                        { id: 'g_gold_1000', name: 'Золотая лихорадка', description: 'Заработать 1000 голды.', icon: '🏆', condition: (stats, gold) => gold >= 1000, reward: REWARD },
+                    ],
+                    addition: [
+                        { id: 's_milestone10', name: 'Первые шаги в сложении', description: 'Решить 10 примеров на сложение однозначных.', icon: '➕', condition: stats => stats.total.singleDigit >= 10, reward: REWARD },
+                        { id: 's_milestone25', name: 'Сложение на отлично', description: 'Решить 25 примеров на сложение однозначных.', icon: '👍', condition: stats => stats.total.singleDigit >= 25, reward: REWARD },
+                        { id: 's_milestone50', name: 'Мастер простого счета', description: 'Решить 50 примеров на сложение однозначных.', icon: '🏅', condition: stats => stats.total.singleDigit >= 50, reward: REWARD },
+                        { id: 's_milestone100', name: 'Король однозначных', description: 'Решить 100 примеров на сложение однозначных.', icon: '👑', condition: stats => stats.total.singleDigit >= 100, reward: REWARD },
+                        { id: 's_streak10', name: 'Серия без ошибок', description: 'Решить 10 примеров на сложение однозначных подряд.', icon: '🎯', condition: stats => stats.streaks.singleDigit >= 10, reward: REWARD },
+                        { id: 'd_milestone10', name: 'Двузначный дебют', description: 'Решить 10 примеров на сложение двузначных.', icon: '⚙️', condition: stats => stats.total.doubleDigit >= 10, reward: REWARD },
+                        { id: 'd_milestone25', name: 'Инженерный подход', description: 'Решить 25 примеров на сложение двузначных.', icon: '📐', condition: stats => stats.total.doubleDigit >= 25, reward: REWARD },
+                        { id: 'd_milestone50', name: 'Архитектор чисел', description: 'Решить 50 примеров на сложение двузначных.', icon: '🏗️', condition: stats => stats.total.doubleDigit >= 50, reward: REWARD },
+                        { id: 'd_milestone100', name: 'Финансовый гений', description: 'Решить 100 примеров на сложение двузначных.', icon: '💹', condition: stats => stats.total.doubleDigit >= 100, reward: REWARD },
+                        { id: 'd_streak10', name: 'Точный расчет', description: 'Решить 10 примеров на сложение двузначных подряд.', icon: '💯', condition: stats => stats.streaks.doubleDigit >= 10, reward: REWARD },
+                    ],
+                    multiplication: [
+                        { id: 'm_milestone10', name: 'Знакомство с таблицей', description: 'Решить 10 примеров на умножение.', icon: '🎓', condition: stats => stats.total.multiplication >= 10, reward: REWARD },
+                        { id: 'm_milestone25', name: 'Уверенный пользователь', description: 'Решить 25 примеров на умножение.', icon: '📚', condition: stats => stats.total.multiplication >= 25, reward: REWARD },
+                        { id: 'm_milestone50', name: 'Магистр умножения', description: 'Решить 50 примеров на умножение.', icon: '🧙', condition: stats => stats.total.multiplication >= 50, reward: REWARD },
+                        { id: 'm_milestone100', name: 'Профессор', description: 'Решить 100 примеров на умножение.', icon: '🏫', condition: stats => stats.total.multiplication >= 100, reward: REWARD },
+                        { id: 'm_milestone200', name: 'Легенда таблицы', description: 'Решить 200 примеров на умножение.', icon: '🌌', condition: stats => stats.total.multiplication >= 200, reward: REWARD },
+                        { id: 'm_streak5', name: 'На потоке', description: 'Решить 5 примеров на умножение подряд.', icon: '🔥', condition: stats => stats.streaks.multiplication >= 5, reward: REWARD },
+                        { id: 'm_streak10', name: 'Не остановить', description: 'Решить 10 примеров на умножение подряд.', icon: '🚀', condition: stats => stats.streaks.multiplication >= 10, reward: REWARD },
+                        { id: 'm_streak15', name: 'Огненная серия', description: 'Решить 15 примеров на умножение подряд.', icon: '☄️', condition: stats => stats.streaks.multiplication >= 15, reward: REWARD },
+                        { id: 'm_streak20', name: 'Безупречность', description: 'Решить 20 примеров на умножение подряд.', icon: '✨', condition: stats => stats.streaks.multiplication >= 20, reward: REWARD },
+                        { id: 'm_streak25', name: 'Машинная точность', description: 'Решить 25 примеров на умножение подряд.', icon: '🤖', condition: stats => stats.streaks.multiplication >= 25, reward: REWARD },
+                    ],
+                    squares: [
+                        { id: 'sq_milestone10', name: 'Первые степени', description: 'Возвести в квадрат 10 чисел.', icon: '📐', condition: stats => stats.total.squares >= 10, reward: REWARD },
+                        { id: 'sq_milestone25', name: 'Квадратный ум', description: 'Возвести в квадрат 25 чисел.', icon: '🧱', condition: stats => stats.total.squares >= 25, reward: REWARD },
+                        { id: 'sq_milestone50', name: 'Мастер квадратов', description: 'Возвести в квадрат 50 чисел.', icon: '🏗️', condition: stats => stats.total.squares >= 50, reward: REWARD },
+                        { id: 'sq_milestone100', name: 'Повелитель степеней', description: 'Возвести в квадрат 100 чисел.', icon: '🏛️', condition: stats => stats.total.squares >= 100, reward: REWARD },
+                        { id: 'sq_milestone200', name: 'Легенда квадратов', description: 'Возвести в квадрат 200 чисел.', icon: '🌇', condition: stats => stats.total.squares >= 200, reward: REWARD },
+                        { id: 'sq_streak5', name: 'Двойной удар', description: 'Возвести в квадрат 5 чисел подряд.', icon: '🔥', condition: stats => stats.streaks.squares >= 5, reward: REWARD },
+                        { id: 'sq_streak10', name: 'Квадратная серия', description: 'Возвести в квадрат 10 чисел подряд.', icon: '🚀', condition: stats => stats.streaks.squares >= 10, reward: REWARD },
+                        { id: 'sq_streak15', name: 'Степень точности', description: 'Возвести в квадрат 15 чисел подряд.', icon: '🎯', condition: stats => stats.streaks.squares >= 15, reward: REWARD },
+                        { id: 'sq_streak20', name: 'Безупречный квадрат', description: 'Возвести в квадрат 20 чисел подряд.', icon: '✨', condition: stats => stats.streaks.squares >= 20, reward: REWARD },
+                        { id: 'sq_streak25', name: 'Совершенная степень', description: 'Возвести в квадрат 25 чисел подряд.', icon: '🤖', condition: stats => stats.streaks.squares >= 25, reward: REWARD },
+                    ],
+                    roots: [
+                        { id: 'rt_milestone10', name: 'В поисках корней', description: 'Извлечь 10 квадратных корней.', icon: '🌳', condition: stats => stats.total.roots >= 10, reward: REWARD },
+                        { id: 'rt_milestone25', name: 'Коренной житель', description: 'Извлечь 25 квадратных корней.', icon: '🏡', condition: stats => stats.total.roots >= 25, reward: REWARD },
+                        { id: 'rt_milestone50', name: 'Мастер извлечений', description: 'Извлечь 50 квадратных корней.', icon: '🛠️', condition: stats => stats.total.roots >= 50, reward: REWARD },
+                        { id: 'rt_milestone100', name: 'Профессор Радикалов', description: 'Извлечь 100 квадратных корней.', icon: '🧑‍🏫', condition: stats => stats.total.roots >= 100, reward: REWARD },
+                        { id: 'rt_milestone200', name: 'Легенда корней', description: 'Извлечь 200 квадратных корней.', icon: '📜', condition: stats => stats.total.roots >= 200, reward: REWARD },
+                        { id: 'rt_streak5', name: 'Докопаться до сути', description: 'Извлечь 5 корней подряд.', icon: '🔥', condition: stats => stats.streaks.roots >= 5, reward: REWARD },
+                        { id: 'rt_streak10', name: 'Корневая система', description: 'Извлечь 10 корней подряд.', icon: '🚀', condition: stats => stats.streaks.roots >= 10, reward: REWARD },
+                        { id: 'rt_streak15', name: 'Радикальная точность', description: 'Извлечь 15 корней подряд.', icon: '🎯', condition: stats => stats.streaks.roots >= 15, reward: REWARD },
+                        { id: 'rt_streak20', name: 'Безупречное извлечение', description: 'Извлечь 20 корней подряд.', icon: '✨', condition: stats => stats.streaks.roots >= 20, reward: REWARD },
+                        { id: 'rt_streak25', name: 'Интуиция гения', description: 'Извлечь 25 корней подряд.', icon: '💡', condition: stats => stats.streaks.roots >= 25, reward: REWARD },
+                    ]
+                };
+            },
+            
+            bindEvents() {
+                document.getElementById('start-btn').addEventListener('click', this.startApp.bind(this));
+                
+                this.headerProfileWidget.addEventListener('click', () => this.switchToView('profile'));
+                document.getElementById('photo-upload').addEventListener('change', this.handlePhotoUpload.bind(this));
+                document.getElementById('save-profile-btn').addEventListener('click', this.saveProfile.bind(this));
+                
+                document.getElementById('go-to-multiplication-btn').addEventListener('click', () => this.startStudy('multiplication'));
+                document.getElementById('go-to-single-digit-btn').addEventListener('click', () => this.startStudy('singleDigit'));
+                document.getElementById('go-to-double-digit-btn').addEventListener('click', () => this.startStudy('doubleDigit'));
+                document.getElementById('go-to-squares-btn').addEventListener('click', () => this.startStudy('squares'));
+                document.getElementById('go-to-roots-btn').addEventListener('click', () => this.startStudy('roots'));
+                document.getElementById('go-to-achievements-btn').addEventListener('click', () => this.switchToView('achievements'));
+
+                document.getElementById('back-to-home-from-study-btn').addEventListener('click', () => this.switchToView('home'));
+                document.getElementById('back-to-home-from-achievements-btn').addEventListener('click', () => this.switchToView('home'));
+                document.getElementById('back-to-home-from-profile-btn').addEventListener('click', () => this.switchToView('home'));
+
+                document.getElementById('check-answer-btn').addEventListener('click', this.checkAnswer.bind(this));
+                this.answerInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') this.checkAnswer();
+                });
+
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target.id === 'notification-modal') this.hideMessage();
+                });
+                document.getElementById('modal-close-btn').addEventListener('click', this.hideMessage.bind(this));
+            },
+            
+            loadData() {
+                this.userName = localStorage.getItem('mathTrainerUser') || '';
+                this.userPhoto = localStorage.getItem('mathTrainerPhoto') || '';
+                this.userStatus = localStorage.getItem('mathTrainerStatus') || '';
+                this.userGold = parseInt(localStorage.getItem('mathTrainerGold'), 10) || 0;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const storedDailyStats = JSON.parse(localStorage.getItem('mathTrainerDailyStats'));
+                if (storedDailyStats && storedDailyStats.date === today) {
+                    this.dailyStats = storedDailyStats;
+                    if (!this.dailyStats.dailyMedalRewardLevel) {
+                        this.dailyStats.dailyMedalRewardLevel = 'none';
+                    }
+                } else {
+                    this.dailyStats = { date: today, solvedCount: 0, dailyMedalRewardLevel: 'none' };
+                }
+                
+                const savedStats = JSON.parse(localStorage.getItem('mathTrainerStats'));
+                this.stats = {
+                    total: (savedStats && savedStats.total) || { multiplication: 0, singleDigit: 0, doubleDigit: 0, squares: 0, roots: 0 },
+                    streaks: (savedStats && savedStats.streaks) || { multiplication: 0, singleDigit: 0, doubleDigit: 0, squares: 0, roots: 0 },
+                    unlockedAchievements: (savedStats && savedStats.unlockedAchievements) || []
+                };
+            },
+
+            saveData() {
+                localStorage.setItem('mathTrainerUser', this.userName);
+                localStorage.setItem('mathTrainerPhoto', this.userPhoto);
+                localStorage.setItem('mathTrainerStatus', this.userStatus);
+                localStorage.setItem('mathTrainerGold', this.userGold);
+                localStorage.setItem('mathTrainerDailyStats', JSON.stringify(this.dailyStats));
+                localStorage.setItem('mathTrainerStats', JSON.stringify(this.stats));
+            },
+
+            startApp() {
+                const nameInput = document.getElementById('name-input');
+                const name = nameInput.value.trim();
+                if (name) {
+                    this.userName = name;
+                    this.saveData();
+                    this.welcomeView.classList.add('hidden');
+                    this.appContainer.classList.remove('hidden');
+                    this.updateHeader();
+                    this.switchToView('home');
+                } else {
+                    this.showMessage('Пожалуйста, введите имя.', 'error');
+                }
+            },
+            
+            updateHeader() {
+                this.headerUsername.textContent = this.userName;
+                this.headerAvatar.src = this.userPhoto || 'https://placehold.co/40x40/4a4f58/abb2bf?text=?';
+                this.updateGoldDisplay();
+            },
+            
+            updateGoldDisplay() {
+                const goldString = `💰 ${this.userGold}`;
+                this.headerGoldDisplay.textContent = goldString;
+                if(this.profileGoldDisplay) this.profileGoldDisplay.textContent = goldString;
+            },
+
+            switchToView(viewName) {
+                [this.homeView, this.studyView, this.achievementsView, this.profileView].forEach(v => v.classList.add('hidden'));
+                
+                const titles = {
+                    home: 'Главное Меню',
+                    study: `Тренировка: ${this.getModeName()}`,
+                    achievements: 'Мои Достижения',
+                    profile: 'Мой Профиль'
+                };
+                this.viewTitle.textContent = titles[viewName] || 'Тренажер';
+
+                this.headerProfileWidget.style.visibility = (viewName === 'study') ? 'hidden' : 'visible';
+
+                switch(viewName) {
+                    case 'home':
+                        this.homeGreeting.textContent = `Привет, ${this.userName}! Выбери режим`;
+                        this.homeView.classList.remove('hidden');
+                        break;
+                    case 'study':
+                        this.studyView.classList.remove('hidden');
+                        break;
+                    case 'achievements':
+                        this.renderAchievementsList();
+                        this.achievementsView.classList.remove('hidden');
+                        break;
+                    case 'profile':
+                        this.renderProfileView();
+                        this.profileView.classList.remove('hidden');
+                        break;
+                }
+            },
+            
+            getModeName() {
+                switch(this.currentMode) {
+                    case 'multiplication': return 'Умножение';
+                    case 'singleDigit': return 'Сложение однозначных';
+                    case 'doubleDigit': return 'Сложение двузначных';
+                    case 'squares': return 'Квадраты';
+                    case 'roots': return 'Квадратные корни';
+                    default: return '';
+                }
+            },
+
+            startStudy(mode) {
+                this.currentMode = mode;
+                this.switchToView('study');
+                this.generateProblem();
+            },
+
+            generateProblem() {
+                let num1, num2, question;
+                switch (this.currentMode) {
+                    case 'multiplication':
+                        num1 = Math.floor(Math.random() * 9) + 2;
+                        num2 = Math.floor(Math.random() * 9) + 2;
+                        this.currentAnswer = num1 * num2;
+                        question = `${num1} × ${num2}`;
+                        break;
+                    case 'singleDigit':
+                        num1 = Math.floor(Math.random() * 10);
+                        num2 = Math.floor(Math.random() * 10);
+                        this.currentAnswer = num1 + num2;
+                        question = `${num1} + ${num2}`;
+                        break;
+                    case 'doubleDigit':
+                        num1 = Math.floor(Math.random() * 90) + 10;
+                        num2 = Math.floor(Math.random() * 90) + 10;
+                        this.currentAnswer = num1 + num2;
+                        question = `${num1} + ${num2}`;
+                        break;
+                    case 'squares':
+                        num1 = Math.floor(Math.random() * 16) + 1; // 1 to 16
+                        this.currentAnswer = num1 * num1;
+                        question = `${num1}²`;
+                        break;
+                    case 'roots':
+                        num1 = Math.floor(Math.random() * 16) + 1; // 1 to 16
+                        const squareNum = num1 * num1;
+                        this.currentAnswer = num1;
+                        question = `√${squareNum}`;
+                        break;
+                }
+                this.problemDisplay.textContent = question;
+                this.answerInput.value = '';
+                this.answerInput.focus();
+            },
+
+            checkAnswer() {
+                const userAnswer = parseInt(this.answerInput.value, 10);
+                if (isNaN(userAnswer)) {
+                    this.showMessage('Пожалуйста, введите число.', 'error');
+                    return;
+                }
+
+                if (userAnswer === this.currentAnswer) {
+                    let goldFromAnswer = 0;
+                    switch (this.currentMode) {
+                        case 'singleDigit': goldFromAnswer = 2; break;
+                        case 'doubleDigit': goldFromAnswer = 3; break;
+                        case 'multiplication': goldFromAnswer = 4; break;
+                        case 'squares': goldFromAnswer = 5; break;
+                        case 'roots': goldFromAnswer = 6; break;
+                    }
+                    this.userGold += goldFromAnswer;
+
+                    this.dailyStats.solvedCount++;
+                    this.stats.total[this.currentMode]++;
+                    this.stats.streaks[this.currentMode]++;
+                    Object.keys(this.stats.streaks).forEach(key => {
+                        if (key !== this.currentMode) this.stats.streaks[key] = 0;
+                    });
+
+                    let medalData = null;
+                    const count = this.dailyStats.solvedCount;
+                    const currentMedalLevel = this.dailyStats.dailyMedalRewardLevel || 'none';
+                    const MEDAL_REWARD = 5;
+
+                    if (count === 1 && currentMedalLevel === 'none') {
+                        this.userGold += MEDAL_REWARD;
+                        this.dailyStats.dailyMedalRewardLevel = 'bronze';
+                        medalData = { name: 'Бронзовая медаль дня!', icon: '🥉', description: 'Вы решили свою первую задачу сегодня!' };
+                    } else if (count === 10 && currentMedalLevel === 'bronze') {
+                        this.userGold += MEDAL_REWARD;
+                        this.dailyStats.dailyMedalRewardLevel = 'silver';
+                        medalData = { name: 'Серебряная медаль дня!', icon: '🥈', description: 'Вы решили 10 задач за сегодня!' };
+                    } else if (count === 30 && currentMedalLevel === 'silver') {
+                        this.userGold += MEDAL_REWARD;
+                        this.dailyStats.dailyMedalRewardLevel = 'gold';
+                        medalData = { name: 'Золотая медаль дня!', icon: '🥇', description: 'Вы решили 30 задач за сегодня!' };
+                    }
+
+                    this.saveData();
+                    this.updateGoldDisplay();
+
+                    const newAchievement = this.checkAchievements();
+
+                    let nextProblemDelay = 1000;
+                    if (newAchievement) {
+                        this.unlockAchievement(newAchievement);
+                        nextProblemDelay = 2600;
+                    } else if (medalData) {
+                        const medalHTML = `<div class="achievement-title">${medalData.name}</div><div class="achievement-icon">${medalData.icon}</div><p class="achievement-description">${medalData.description}</p><p class="achievement-reward">+${MEDAL_REWARD} 💰</p>`;
+                        this.showMessage(medalHTML, 'achievement', 2500, true);
+                        nextProblemDelay = 2600;
+                    } else {
+                        const randomPhrase = this.positiveFeedback[Math.floor(Math.random() * this.positiveFeedback.length)];
+                        this.showMessage(`${randomPhrase} (+${goldFromAnswer} 💰)`, 'success', 1500);
+                        nextProblemDelay = 1600;
+                    }
+                    
+                    setTimeout(() => this.generateProblem(), nextProblemDelay);
+
+                } else {
+                    const randomPhrase = this.negativeFeedback[Math.floor(Math.random() * this.negativeFeedback.length)];
+                    this.showMessage(randomPhrase, 'error');
+                    if (navigator.vibrate) navigator.vibrate(200);
+
+                    this.answerInput.value = '';
+                    this.answerInput.focus();
+
+                    this.stats.streaks[this.currentMode] = 0;
+                    this.saveData();
+                }
+            },
+
+            handlePhotoUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showMessage('Файл слишком большой! (Максимум 5 МБ)', 'error');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    this.userPhoto = event.target.result;
+                    this.profilePicture.src = this.userPhoto;
+                };
+                reader.readAsDataURL(file);
+            },
+
+            saveProfile() {
+                const newName = this.profileNameInput.value.trim();
+                const newStatus = this.profileStatusInput.value.trim();
+                
+                if (newName) {
+                    this.userName = newName;
+                    this.userStatus = newStatus; 
+                    this.saveData();
+                    this.updateHeader();
+                    this.showMessage('Профиль успешно сохранен!', 'success');
+                    this.switchToView('home');
+                } else {
+                    this.showMessage('Имя не может быть пустым.', 'error');
+                }
+            },
+
+            renderProfileView() {
+                this.profileNameInput.value = this.userName;
+                this.profileStatusInput.value = this.userStatus;
+                this.profilePicture.src = this.userPhoto || 'https://placehold.co/200x200/4a4f58/abb2bf?text=Фото';
+                this.updateGoldDisplay();
+                this.updateMedal();
+            },
+            
+            updateMedal() {
+                const count = this.dailyStats.solvedCount;
+                this.medalIcon.className = 'medal-icon';
+
+                if (count >= 30) {
+                    this.medalIcon.textContent = '🥇';
+                    this.medalIcon.classList.add('medal-gold');
+                    this.medalDescription.textContent = 'Золотая медаль! (Сегодня решено 30+)';
+                } else if (count >= 10) {
+                    this.medalIcon.textContent = '🥈';
+                    this.medalIcon.classList.add('medal-silver');
+                    this.medalDescription.textContent = 'Серебряная медаль! (Сегодня решено 10-29)';
+                } else if (count > 0) {
+                    this.medalIcon.textContent = '🥉';
+                    this.medalIcon.classList.add('medal-bronze');
+                    this.medalDescription.textContent = 'Бронзовая медаль! (Сегодня решено 1-9)';
+                } else {
+                    this.medalIcon.textContent = '❔';
+                    this.medalIcon.classList.add('medal-transparent');
+                    this.medalDescription.textContent = 'Решите хотя бы одну задачу сегодня!';
+                }
+            },
+
+            renderAchievementsList() {
+                this.achievementsListContainer.innerHTML = '';
+                const categoryTitles = {
+                    general: 'Общие Достижения',
+                    addition: 'Сложение',
+                    multiplication: 'Умножение',
+                    squares: 'Квадраты',
+                    roots: 'Квадратные корни'
+                };
+
+                for (const categoryKey in this.achievements) {
+                    const category = this.achievements[categoryKey];
+                    
+                    const titleElement = document.createElement('h2');
+                    titleElement.textContent = categoryTitles[categoryKey];
+                    this.achievementsListContainer.appendChild(titleElement);
+
+                    category.forEach(ach => {
+                        const isUnlocked = this.stats.unlockedAchievements.includes(ach.id);
+                        const item = document.createElement('div');
+                        item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+                        item.innerHTML = `<div class="achievement-icon-list">${ach.icon}</div><div class="achievement-details"><div class="achievement-name">${ach.name}</div><div class="achievement-desc">${ach.description}</div></div>`;
+                        this.achievementsListContainer.appendChild(item);
+                    });
+                }
+            },
+            
+            checkAchievements() {
+                for (const categoryKey in this.achievements) {
+                    for (const ach of this.achievements[categoryKey]) {
+                        if (!this.stats.unlockedAchievements.includes(ach.id) && ach.condition(this.stats, this.userGold)) {
+                            return ach;
+                        }
+                    }
+                }
+                return null;
+            },
+            
+            unlockAchievement(achievement) {
+                if(this.stats.unlockedAchievements.includes(achievement.id)) return;
+                
+                this.stats.unlockedAchievements.push(achievement.id);
+                this.userGold += achievement.reward;
+                this.saveData();
+                this.updateGoldDisplay();
+                
+                const achievementHTML = `<div class="achievement-title">${achievement.name}</div><div class="achievement-icon">${achievement.icon}</div><p class="achievement-description">${achievement.description}</p><p class="achievement-reward">+${achievement.reward} 💰</p>`;
+                this.showMessage(achievementHTML, 'achievement', 2500, true);
+            },
+
+            showMessage(message, type = 'info', duration = 1500, isHTML = false) {
+                clearTimeout(this.messageTimeout);
+                
+                if (isHTML) {
+                    this.modalMessage.innerHTML = message;
+                } else {
+                    this.modalMessage.textContent = message;
+                }
+
+                this.modalMessage.className = `modal-message ${type}`;
+                this.modal.classList.remove('hidden');
+
+                if (duration > 0) {
+                     this.messageTimeout = setTimeout(() => {
+                         this.hideMessage();
+                     }, duration);
+                }
+            },
+            
+            hideMessage() {
+                if(!this.modal.classList.contains('hidden')) {
+                    this.modal.classList.add('hidden');
+                }
+                clearTimeout(this.messageTimeout);
+            }
+        };
+
+        MathTrainerApp.init();
+    });
+    </script>
+</body>
+</html>
